@@ -9,7 +9,7 @@ var map = new mapboxgl.Map({
     //Starting LngLat
     center: [-71.104081, 42.365554],
     //Starting zoom
-    zoom: 10
+    zoom: 12
 })
 /*Creating marker before the run function
 (Uncaught promise error when put inside the run function)
