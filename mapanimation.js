@@ -86,7 +86,6 @@ const showAll = async () => {
 
     geoJSON.features.push(_feature);
     };
-    console.log(geoJSON.features)
 
     if (check.value == "off") {
         marked.forEach((marker) =>{
@@ -95,9 +94,16 @@ const showAll = async () => {
         check.value = "on"
     } else {
         geoJSON.features.forEach((marker) => {
-            let currentMarker = new mapboxgl.Marker()
+            let popup = new mapboxgl.Popup({})
+            .setText(marker.properties.title)
+            .addTo(map)
+            console.log(marker.properties)
+            let currentMarker = new mapboxgl.Marker({
+                color: "green"
+            })
                 .setLngLat(marker.geometry.coordinates)
                 .addTo(map)
+                .setPopup(popup)
             marked.push(currentMarker);
         }); check.value = "off";
     }
