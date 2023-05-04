@@ -11,6 +11,7 @@ var map = new mapboxgl.Map({
 });
 //Creating marker before the run function
 //(Uncaught promise error when put inside the run function)
+var marked = [];
 
 //Fetching API to add values to dropdown available buses
 const select = document.getElementById("select")
@@ -59,51 +60,56 @@ async function run(){
 };
 
 const showAll = async () => {
-    var marked = []
     var options = await getBusLocations();
     var check = document.getElementById("btn")
-    var allMarker = [];
+    
     var geoJSON = {
         type:'FeatureCollection',
         features: []
     };
-            for (var index in options){
-            bus = options[index].attributes
-            lngLat = [bus.longitude, bus.latitude];
-            allMarker.push(lngLat);
-    
-            _feature = {
-                "type": 'Feature',
-                "geometry": {
-                  "type": 'Point',
-                  "coordinates": lngLat,
-                },
-                "properties": {
-                  "title": bus.label,
-                  "description": " // Current Stop: "+bus.current_stop_sequence+" // Occupancy: "+bus.occupancy_status
-                }
-              }
-              if (check.value=="on") {
-                check.value="off"
-                geoJSON.features.push(_feature);
-                geoJSON.features.forEach((marker) => {
-                    marked.push = new mapboxgl.Marker({
-                        color: "green",
-                    })  .setLngLat(marker.geometry.coordinates)
-                        .addTo(map);
-                });
-            } else if (check.value=="off") {
-                marked.remove();
-            } check.value="on"
-            };
 
-    const onOff = () => {
-            console.log(geoJSON.features)
+    for (var index in options){
+    bus = options[index].attributes
+    lngLat = [bus.longitude, bus.latitude];
+    
+    _feature = {
+        "type": 'Feature',
+        "geometry": {
+          "type": 'Point',
+          "coordinates": lngLat,
+        },
+        "properties": {
+          "title": bus.label,
+          "description": " // Current Stop: "+bus.current_stop_sequence+" // Occupancy: "+bus.occupancy_status
+        }
+      };
+
+    geoJSON.features.push(_feature);
+    };
+    console.log(geoJSON.features)
+
+    if (check.value == "off") {
+        marked.forEach((marker) =>{
+            marker.remove();
+        })
+        check.value = "on"
+    } else {
+        geoJSON.features.forEach((marker) => {
             
-                
-            }
+            //marker.push = new mapboxgl.Marker({
+            //    color: "green",
+            //})  .setLngLat(marker.geometry.coordinates)
+            //    .addTo(map);
+
+            let currentMarker = new mapboxgl.Marker()
+                .setLngLat(marker.geometry.coordinates)
+                .addTo(map)
         
+            marked.push(currentMarker);
+        }); check.value = "off";
     }
+};  
+
 
 // Request bus data from MBTA
 async function getBusLocations(){
