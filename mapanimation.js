@@ -1,78 +1,91 @@
-//API token
+// API token
 mapboxgl.accessToken = 'pk.eyJ1IjoiZ3JlYW4iLCJhIjoiY2wyemR4aHd0MWUycjNjcGZkdGR6MDcxdiJ9.xxcZhJA4uVkMJE9Jxw1LoQ'
 
-//Creating default map using mapbox
+// Creating default map using mapbox
 var map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://style/mapbox/streets-v11',
-    //Starting LngLat
+    // Starting LngLat
     center: [-71.060081, 42.364554],
     zoom: 11
 });
-//Creating marker before the run function
-//(Uncaught promise error when put inside the run function)
+
+// Global marker value
+// (Uncaught promise error when put inside the run function)
 var marked = [];
 
-//Fetching API to add values to dropdown available buses
+// Fetching API to add values to dropdown
 const select = document.getElementById("select")
 const displayOption = async () => {
-    const options = await getBusLocations();
-        //Creates option tags under the select tag for every bus
+    var options = await getBusLocations();
+        // Creates HTML option tags under the HTML select tag for every bus
         for (var bus in options) {
             const newOptions = document.createElement("option");
-            //console.log(options[bus].id);
             newOptions.text = options[bus].id;
             newOptions.value = options[bus].id;
             select.appendChild(newOptions);
         };
 };  displayOption();
 
-//Function to move the marker
+// Displays and moves sepific selected marker
 async function run(){
+    var options = await getBusLocations();
+    // Used to check if a marker already exist on the map
+    var currentMarker = document.getElementsByClassName("mapboxgl-marker")
 
-    const options = await getBusLocations();
-
-    //Currently selected bus from the dropdown
+    // Currently selected bus from the dropdown
     var selectedBus = document.getElementById("select");
     var value = selectedBus.value;
 
-    /*********************************************************
-    This code can be used to get 'text' instead of the value
-    var text = selectedBus.options[selectedBus.selectedIndex].text;
-    **********************************************************/
-
-    //Selected dropdown value is saved as 'selected'
+    // Saves selected dropdown value as 'selected'
     var selected = options.find(bus => bus.id == value)
+    // Checks and removes marker if already exist
+    if (currentMarker.length !== 0) {
+        marked.forEach((marker) =>{
+            marker.remove();
+        })
+        marked.splice(0, marked.length)
+    }
 
-    //Sets the LngLat value for currently selected bus
-    //newMarker.push(selected.attributes.longitude, selected.attributes.latitude);
-    //marker.setLngLat(newMarker);  
-    var marker = new mapboxgl.Marker({
+    // Popup value
+    let popup = new mapboxgl.Popup({
+        closeButton: false
+    })
+    .setHTML("Bus ID: " + selected.attributes.label + 
+    "<hr/><p> Current Stop: " + selected.attributes.current_stop_sequence + 
+    "</p><p>Occupancy: " + selected.attributes.occupancy_status + 
+    "</p>")
+
+    // Creates a marker and a popup on to the map with the corresponding info
+    currentMap = new mapboxgl.Marker({
         color: "green",
-    })  .setLngLat([selected.attributes.longitude, selected.attributes.latitude])
-        .addTo(map);
+    })  .setLngLat([selected.attributes.longitude,selected.attributes.latitude])
+        .addTo(map)
+        .setPopup(popup);
 
-    //Printing date and the newMarker to console tap
-    console.log(new Date());
+    marked.push(currentMap);
 
     //Updates the marker every 10sec
     setTimeout(run, 10000);
 };
 
+// Displays every marker on the API
 const showAll = async () => {
     var options = await getBusLocations();
+
+    // Used to check and update the button if pressed
     var check = document.getElementById("btn")
-    
+
+    // geoJSON object is needed for multiple markers and popups
     var geoJSON = {
         type:'FeatureCollection',
         features: []
     };
-
+    // Create & push geoJSON
     for (var index in options){
     bus = options[index].attributes
     lngLat = [bus.longitude, bus.latitude];
-    
-    _feature = {
+    feature = {
         "type": 'Feature',
         "geometry": {
           "type": 'Point',
@@ -80,24 +93,28 @@ const showAll = async () => {
         },
         "properties": {
           "title": bus.label,
-          "description": " // Current Stop: "+bus.current_stop_sequence+" // Occupancy: "+bus.occupancy_status
+          "description": " <hr/><p> Current Stop: " + bus.current_stop_sequence + "</p>" + "<p>Occupancy: " + bus.occupancy_status + "</p>"
         }
       };
-
-    geoJSON.features.push(_feature);
+    geoJSON.features.push(feature);
     };
 
+    // Removes marker and updates button if value is off
     if (check.value == "off") {
         marked.forEach((marker) =>{
             marker.remove();
         })
-        check.value = "on"
+        marked.splice(0, marked.length)
+        check.value = "on"; 
+        check.textContent = "Display All"
     } else {
+        // Updates and displays marker with popup if the button value is on
         geoJSON.features.forEach((marker) => {
-            let popup = new mapboxgl.Popup({})
-            .setText(marker.properties.title)
-            .addTo(map)
-            console.log(marker.properties)
+            let popup = new mapboxgl.Popup({
+                closeButton: false
+            })
+            .setHTML('Bus ID: ' + marker.properties.title + marker.properties.description)
+
             let currentMarker = new mapboxgl.Marker({
                 color: "green"
             })
@@ -105,10 +122,10 @@ const showAll = async () => {
                 .addTo(map)
                 .setPopup(popup)
             marked.push(currentMarker);
-        }); check.value = "off";
+
+        }); check.value = "off"; check.textContent = "Remove All"
     }
 };  
-
 
 // Request bus data from MBTA
 async function getBusLocations(){
