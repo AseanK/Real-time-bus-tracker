@@ -15,7 +15,7 @@
 - Details of the bus is shown when the pin is pressed.
 - Buses are tracked every 10 seconds.
 
-**[Click here] to open Real tim bus tracker.**(https://aseank.github.io/Real-time-bus-tracker/)
+**https://aseank.github.io/Real-time-bus-tracker/**
 
 <img src='bus.gif' width='720' height='720'>
 
