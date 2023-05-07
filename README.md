@@ -1,5 +1,5 @@
 <img src='bus.gif' width='720' height='720'>
-**https://aseank.github.io/Real-time-bus-tracker**
+**https://aseank.github.io/Real-time-bus-tracker
 
 
 # Real time bus tracker (about)
