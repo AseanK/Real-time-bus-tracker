@@ -1,5 +1,5 @@
 // API token
-mapboxgl.accessToken = 'pk.eyJ1IjoiZ3JlYW4iLCJhIjoiY2wyemR4aHd0MWUycjNjcGZkdGR6MDcxdiJ9.xxcZhJA4uVkMJE9Jxw1LoQ'
+mapboxgl.accessToken = 'ENV_VAL'
 
 // Creating default map using mapbox
 var map = new mapboxgl.Map({
